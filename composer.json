@@ -1,0 +1,24 @@
+{
+    "name": "hexlet/code",
+    "description": "Difference calculator project",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "topmate",
+            "email": "1stbagswag@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "bin": [
+        "bin/gendiff"
+    ],
+    "autoload": {
+        "files": [
+            "vendor/docopt/docopt/src/docopt.php"
+        ]
+    },
+    "require": {
+        "docopt/docopt": "dev-master"
+    }
+}
