@@ -25,6 +25,11 @@ Options:
 
 DOC;
 
-$args = Docopt::handle($doc, array('version'=>'dev-master'));
-foreach ($args as $k=>$v)
-    echo $k.': '.json_encode($v).PHP_EOL;
+$args = Docopt::handle($doc, array('version'=>'0.0.1'));
+$firstFilePath = $args['<firstFile>'];
+$secondFilePath = $args['<secondFile>'];
+
+use function Differ\Differ\genDiff;
+
+$diff = genDiff($firstFilePath, $secondFilePath);
+print_r($diff);
