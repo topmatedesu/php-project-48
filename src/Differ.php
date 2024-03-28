@@ -2,7 +2,7 @@
 
 namespace Differ\Differ;
 
-function getData(string $data): mixed
+function getData(string $data): array
 {
     $dataDecode = json_decode($data, true);
 

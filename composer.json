@@ -10,6 +10,9 @@
         }
     ],
     "minimum-stability": "dev",
+    "scripts": {
+        "test": "phpunit tests"
+    },
     "bin": [
         "bin/gendiff"
     ],
@@ -23,6 +26,7 @@
         "lstrojny/functional-php": "dev-main"
     },
     "require-dev": {
-        "squizlabs/php_codesniffer": "*"
+        "squizlabs/php_codesniffer": "*",
+        "phpunit/phpunit": "^11.1@dev"
     }
 }
