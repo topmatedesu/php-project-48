@@ -1,0 +1,13 @@
+name: github-check
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: composer install
+        run: make install
+      - name: run linter
+        run: make lint
+      - name: run tests
+        run: make test
