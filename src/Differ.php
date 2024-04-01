@@ -2,30 +2,13 @@
 
 namespace Differ\Differ;
 
-function getData(string $data): array
-{
-    $dataDecode = json_decode($data, true);
-
-    return array_map(function ($value) {
-        if ($value === true) {
-            return 'true';
-        } elseif ($value === false) {
-            return 'false';
-        } elseif (is_null($value)) {
-            return 'null';
-        }
-
-        return $value;
-    }, $dataDecode);
-}
+use function Differ\Parsers\fileDecode;
 
 function genDiff(string $firstFilePath, string $secondFilePath): string
 {
-    $firstContent = file_get_contents($firstFilePath);
-    $secondContent = file_get_contents($secondFilePath);
 
-    $firstData = getData($firstContent);
-    $secondData = getData($secondContent);
+    $firstData = fileDecode($firstFilePath);
+    $secondData = fileDecode($secondFilePath);
 
     $firstDataKeys = array_keys($firstData);
     $secondDataKeys = array_keys($secondData);

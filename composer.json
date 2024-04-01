@@ -18,12 +18,14 @@
     ],
     "autoload": {
         "files": [
-            "src/Differ.php"
+            "src/Differ.php",
+            "src/Parsers.php"
         ]
     },
     "require": {
         "docopt/docopt": "dev-master",
-        "lstrojny/functional-php": "dev-main"
+        "lstrojny/functional-php": "dev-main",
+        "symfony/yaml": "7.1.x-dev"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "*",
