@@ -25,11 +25,12 @@ Options:
 
 DOC;
 
-$args = Docopt::handle($doc, array('version'=>'0.0.2'));
+$args = Docopt::handle($doc, array('version'=>'0.1.0'));
 $firstFilePath = $args['<firstFile>'];
 $secondFilePath = $args['<secondFile>'];
+$format = $args['--format'];
 
 use function Differ\Differ\genDiff;
 
-$diff = genDiff($firstFilePath, $secondFilePath);
+$diff = genDiff($firstFilePath, $secondFilePath, $format);
 print_r($diff);

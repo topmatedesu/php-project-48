@@ -7,3 +7,4 @@
 ## Asciinema recordings:
 * ### [Json diff](https://asciinema.org/a/3Sc6b0WzmzV0kCM4QnkvgTLlF)
 * ### [Yml diff](https://asciinema.org/a/wNMSbjcCNNrnkNUlwMIWxgMdT)
+* ### [Nested diff](https://asciinema.org/a/l9rGicehobib2y0nh7wKodjcZ)

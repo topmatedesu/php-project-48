@@ -14,6 +14,23 @@ function getRealPath(string $filePath): string
     return $fullPath;
 }
 
+function getFormattedArray(array $dataArray): array
+{
+    return array_map(function ($value) {
+        if ($value === true) {
+            return 'true';
+        } elseif ($value === false) {
+            return 'false';
+        } elseif (is_null($value)) {
+            return 'null';
+        } elseif (is_array($value)) {
+            return getFormattedArray($value);
+        }
+
+        return $value;
+    }, $dataArray);
+}
+
 function fileDecode(string $filePath): array
 {
     $fullPath = getRealPath($filePath);
@@ -29,15 +46,5 @@ function fileDecode(string $filePath): array
         $dataArray = Yaml::parse($data);
     }
 
-    return array_map(function ($value) {
-        if ($value === true) {
-            return 'true';
-        } elseif ($value === false) {
-            return 'false';
-        } elseif (is_null($value)) {
-            return 'null';
-        }
-
-        return $value;
-    }, $dataArray);
+    return getFormattedArray($dataArray);
 }

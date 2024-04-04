@@ -3,32 +3,75 @@
 namespace Differ\Differ;
 
 use function Differ\Parsers\fileDecode;
+use function Differ\Stylish\stringifyTree;
 
-function genDiff(string $firstFilePath, string $secondFilePath): string
+function getArrayComparisonTree(array $array1, array $array2): array
+{
+    $result = [];
+    $firstArrayKeys = array_keys($array1);
+    $secondArrayKeys = array_keys($array2);
+    $keys = array_unique(array_merge($firstArrayKeys, $secondArrayKeys));
+    sort($keys, SORT_REGULAR);
+
+    foreach ($keys as $key) {
+        if (
+            array_key_exists($key, $array1) && array_key_exists($key, $array2)
+            && is_array($array1[$key]) && is_array($array2[$key])
+        ) {
+            $nestedComparison = getArrayComparisonTree($array1[$key], $array2[$key]);
+
+            $result[] = [
+                'key' => $key,
+                'type' => 'immutable',
+                'value' => $nestedComparison,
+            ];
+        } elseif (!array_key_exists($key, $array2)) {
+            $result[] = [
+                'key' => $key,
+                'type' => 'deleted',
+                'value' => $array1[$key],
+            ];
+        } elseif (!array_key_exists($key, $array1)) {
+            $result[] = [
+                'key' => $key,
+                'type' => 'added',
+                'value' => $array2[$key],
+            ];
+        } elseif ($array1[$key] !== $array2[$key]) {
+            $result[] = [
+                'key' => $key,
+                'type' => 'deleted',
+                'value' => $array1[$key],
+            ];
+            $result[] = [
+                'key' => $key,
+                'type' => 'added',
+                'value' => $array2[$key],
+            ];
+        } else {
+            $result[] = [
+                'key' => $key,
+                'type' => 'immutable',
+                'value' => $array1[$key],
+            ];
+        }
+    }
+
+    return $result;
+}
+
+function genDiff(string $firstFilePath, string $secondFilePath, string $format = 'stylish'): string
 {
 
     $firstData = fileDecode($firstFilePath);
     $secondData = fileDecode($secondFilePath);
 
-    $firstDataKeys = array_keys($firstData);
-    $secondDataKeys = array_keys($secondData);
-    $keys = array_unique(array_merge($firstDataKeys, $secondDataKeys));
-    sort($keys, SORT_REGULAR);
+    $diffArray = getArrayComparisonTree($firstData, $secondData);
+    $result = '';
 
-    $diff = array_reduce($keys, function ($acc, $key) use ($firstData, $secondData) {
-        if (!array_key_exists($key, $firstData)) {
-            $acc[] = '  + ' . $key . ': ' . $secondData[$key];
-        } elseif (!array_key_exists($key, $secondData)) {
-            $acc[] = '  - ' . $key . ': ' . $firstData[$key];
-        } elseif ($firstData[$key] !== $secondData[$key]) {
-            $acc[] = '  - ' . $key . ': ' . $firstData[$key];
-            $acc[] = '  + ' . $key . ': ' . $secondData[$key];
-        } else {
-            $acc[] = '    ' . $key . ': ' . $firstData[$key];
-        }
+    if ($format === 'stylish') {
+        $result = stringifyTree($diffArray);
+    }
 
-        return $acc;
-    }, []);
-
-    return '{' . "\n" . implode("\n", $diff) . "\n" . '}' . "\n";
+    return $result . "\n";
 }
