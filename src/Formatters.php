@@ -4,6 +4,7 @@ namespace Differ\Formatters;
 
 use function Differ\Formatters\Stylish\stringifyTree;
 use function Differ\Formatters\Plain\stringifyTreeToPlain;
+use function Differ\Formatters\Json\getJsonFormat;
 
 function getArrayComparisonTree(array $array1, array $array2): array
 {
@@ -73,6 +74,10 @@ function getFormatter(array $dataArray1, array $dataArray2, string $format): str
 
     if ($format === 'plain') {
         $result = stringifyTreeToPlain($diffArray);
+    }
+
+    if ($format === 'json') {
+        $result = getJsonFormat($diffArray);
     }
 
     return $result;

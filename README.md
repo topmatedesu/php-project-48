@@ -9,3 +9,4 @@
 * ### [Yml diff](https://asciinema.org/a/wNMSbjcCNNrnkNUlwMIWxgMdT)
 * ### [Nested diff](https://asciinema.org/a/l9rGicehobib2y0nh7wKodjcZ)
 * ### [Plain diff](https://asciinema.org/a/DLEdQ7nsUmo9cwsdQmBo4m2hf)
+* ### [Json format diff](https://asciinema.org/a/n9ocs3WXO6vixRn2TNFvlgMh2)
