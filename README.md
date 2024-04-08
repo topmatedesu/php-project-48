@@ -4,6 +4,34 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/3a9035d62769af702e9f/maintainability)](https://codeclimate.com/github/topmatedesu/php-project-48/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/3a9035d62769af702e9f/test_coverage)](https://codeclimate.com/github/topmatedesu/php-project-48/test_coverage)
 
+# Difference Calculator
+This is a library that allows you to find differences in files
+
+## Requirements
+PHP 8.2.10
+
+## How to install
+```
+git clone https://github.com/topmatedesu/php-project-48.git
+```
+```
+make install
+```
+## How to use
+### Show help
+```
+./bin/gendiff -h
+```
+### Show version
+```
+./bin/gendiff -v
+```
+### Find the differences
+Format options: stylish (default), plain, json
+```
+./bin/gendiff --format <option> <path to first file> <path to second file>
+```
+
 ## Asciinema recordings:
 * ### [Json diff](https://asciinema.org/a/3Sc6b0WzmzV0kCM4QnkvgTLlF)
 * ### [Yml diff](https://asciinema.org/a/wNMSbjcCNNrnkNUlwMIWxgMdT)
