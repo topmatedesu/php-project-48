@@ -9,7 +9,7 @@
             "email": "1stbagswag@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "scripts": {
         "test": "phpunit tests"
     },
