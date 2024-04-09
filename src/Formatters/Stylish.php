@@ -7,7 +7,7 @@ function toString(string $value): string
     return trim(var_export($value, true), "'");
 }
 
-function stringifyTree(array $value, string $replacer = ' ', int $spaceCount = 4): string
+function stringifyTree(mixed $value, string $replacer = ' ', int $spaceCount = 4): string
 {
     if (!is_array($value)) {
         return toString($value);

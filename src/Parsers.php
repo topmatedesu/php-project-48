@@ -31,20 +31,24 @@ function getFormattedArray(array $dataArray): array
     }, $dataArray);
 }
 
-function fileDecode(string $filePath): array
+function fileDecode(string $filePath): mixed
 {
     $fullPath = getRealPath($filePath);
     $data = file_get_contents($fullPath);
-    $extension = pathinfo($fullPath)['extension'];
-    $dataArray = [];
+    $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
 
-    if ($extension === 'json') {
-        $dataArray = json_decode($data, true);
+    if ($data === false) {
+        throw new \Exception("Can't read file");
     }
 
-    if ($extension === 'yml' || $extension === 'yaml') {
-        $dataArray = Yaml::parse($data);
+    switch ($extension) {
+        case 'json':
+            return getFormattedArray(json_decode($data, true));
+        case 'yml':
+            return getFormattedArray(Yaml::parse($data));
+        case 'yaml':
+            return getFormattedArray(Yaml::parse($data));
+        default:
+            throw new \Exception("Unknown extension {$extension}");
     }
-
-    return getFormattedArray($dataArray);
 }

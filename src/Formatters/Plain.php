@@ -21,27 +21,27 @@ function normalizeValue(mixed $value): mixed
 
 function stringifyTreeToPlain(array $diffArray, string $parentKey = ''): string
 {
-    $result = array_map(function ($node) use ($parentKey) {
+    $plain = array_map(function ($node) use ($parentKey) {
 
         $key =  $node['key'];
         $type = $node['type'];
         $value1 = $node['value1'];
         $value2 = $node['value2'];
 
-        $newKey = $parentKey === '' ? $key : $parentKey . '.' . $key;
+        $newKey = $parentKey === '' ? $key : "{$parentKey}.{$key}";
 
         switch ($type) {
             case 'nested':
                 return stringifyTreeToPlain($value1, $newKey);
             case 'added':
                 $normalizeValue = normalizeValue($value2);
-                return "Property '" . $newKey . "' was added with value: " . $normalizeValue;
+                return "Property '{$newKey}' was added with value: {$normalizeValue}";
             case 'deleted':
-                return "Property '" . $newKey . "' was removed";
+                return "Property '{$newKey}' was removed";
             case 'updated':
                 $normalizeValue1 = normalizeValue($value1);
                 $normalizeValue2 = normalizeValue($value2);
-                return "Property '" . $newKey . "' was updated. From " . $normalizeValue1 . ' to ' . $normalizeValue2;
+                return "Property '{$newKey}' was updated. From {$normalizeValue1} to {$normalizeValue2}";
             case 'immutable':
                 break;
             default:
@@ -49,7 +49,7 @@ function stringifyTreeToPlain(array $diffArray, string $parentKey = ''): string
         }
     }, $diffArray);
 
-    $result = array_filter($result);
+    $removeEmptyValues = array_filter($plain);
 
-    return implode("\n", $result);
+    return implode("\n", $removeEmptyValues);
 }

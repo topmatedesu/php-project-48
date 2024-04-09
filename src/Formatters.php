@@ -5,13 +5,14 @@ namespace Differ\Formatters;
 use function Differ\Formatters\Stylish\stringifyTree;
 use function Differ\Formatters\Plain\stringifyTreeToPlain;
 use function Differ\Formatters\Json\getJsonFormat;
+use function Functional\sort;
 
 function getArrayComparisonTree(array $array1, array $array2): array
 {
     $firstArrayKeys = array_keys($array1);
     $secondArrayKeys = array_keys($array2);
     $keys = array_unique(array_merge($firstArrayKeys, $secondArrayKeys));
-    sort($keys, SORT_REGULAR);
+    $sortedKeys = sort($keys, fn ($left, $right) => strcmp($left, $right));
 
     $result = array_map(
         function ($key) use ($array1, $array2) {
@@ -57,7 +58,7 @@ function getArrayComparisonTree(array $array1, array $array2): array
                 ];
             }
         },
-        $keys
+        $sortedKeys
     );
 
     return $result;
@@ -65,20 +66,16 @@ function getArrayComparisonTree(array $array1, array $array2): array
 
 function getFormatter(array $dataArray1, array $dataArray2, string $format): string
 {
-    $result = '';
     $diffArray = getArrayComparisonTree($dataArray1, $dataArray2);
 
-    if ($format === 'stylish') {
-        $result = stringifyTree($diffArray);
+    switch ($format) {
+        case 'stylish':
+            return stringifyTree($diffArray);
+        case 'plain':
+            return stringifyTreeToPlain($diffArray);
+        case 'json':
+            return getJsonFormat($diffArray);
+        default:
+            throw new \Exception("Unknown format {$format}");
     }
-
-    if ($format === 'plain') {
-        $result = stringifyTreeToPlain($diffArray);
-    }
-
-    if ($format === 'json') {
-        $result = getJsonFormat($diffArray);
-    }
-
-    return $result;
 }
