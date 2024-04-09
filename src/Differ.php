@@ -11,7 +11,7 @@ function genDiff(string $firstFilePath, string $secondFilePath, string $format =
     $firstData = fileDecode($firstFilePath);
     $secondData = fileDecode($secondFilePath);
 
-    $result = getFormatter($firstData, $secondData, $format);
+    $diff = getFormatter($firstData, $secondData, $format);
 
-    return $result . "\n";
+    return "{$diff}\n";
 }

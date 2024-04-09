@@ -14,7 +14,7 @@ function getArrayComparisonTree(array $array1, array $array2): array
     $keys = array_unique(array_merge($firstArrayKeys, $secondArrayKeys));
     $sortedKeys = sort($keys, fn ($left, $right) => strcmp($left, $right));
 
-    $result = array_map(
+    return array_map(
         function ($key) use ($array1, $array2) {
             if (
                 array_key_exists($key, $array1) && array_key_exists($key, $array2)
@@ -60,8 +60,6 @@ function getArrayComparisonTree(array $array1, array $array2): array
         },
         $sortedKeys
     );
-
-    return $result;
 }
 
 function getFormatter(array $dataArray1, array $dataArray2, string $format): string
