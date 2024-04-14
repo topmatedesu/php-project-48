@@ -3,35 +3,36 @@
 namespace Differ\Tests;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 use function Differ\Differ\genDiff;
 
 class DifferTest extends TestCase
 {
-    public function testGenDiff(): void
+    private function getFixturePath(string $fixtureName): string
     {
-        $expected1 = file_get_contents('./tests/fixtures/stylish');
+        return __DIR__ . '/fixtures/' . $fixtureName;
+    }
 
-        $actual1 = genDiff('./tests/fixtures/file3.json', './tests/fixtures/file4.json');
-        $this->assertEquals($expected1, $actual1);
+    public static function diffProvider(): array
+    {
+        return [
+            ['file1.json', 'file2.json', 'stylish', 'stylish.txt'],
+            ['file1.yml', 'file2.yml', 'stylish', 'stylish.txt'],
+            ['file1.json', 'file2.json', 'plain', 'plain.txt'],
+            ['file1.yml', 'file2.yml', 'plain', 'plain.txt'],
+            ['file1.json', 'file2.json', 'json', 'json.txt'],
+            ['file1.yml', 'file2.yml', 'json', 'json.txt']
+        ];
+    }
 
-        $actual2 = genDiff('./tests/fixtures/file3.yml', './tests/fixtures/file4.yml');
-        $this->assertEquals($expected1, $actual2);
+    #[DataProvider('diffProvider')]
+    public function testGenDiff(string $file1, string $file2, string $format, string $expected): void
+    {
+        $fixture1 = $this->getFixturePath($file1);
+        $fixture2 = $this->getFixturePath($file2);
+        $expectedDiff = $this->getFixturePath($expected);
 
-        $expected2 = file_get_contents('./tests/fixtures/plain');
-
-        $actual3 = genDiff('./tests/fixtures/file3.json', './tests/fixtures/file4.json', 'plain');
-        $this->assertEquals($expected2, $actual3);
-
-        $actual4 = genDiff('./tests/fixtures/file3.yml', './tests/fixtures/file4.yml', 'plain');
-        $this->assertEquals($expected2, $actual4);
-
-        $expected3 = file_get_contents('./tests/fixtures/json');
-
-        $actual5 = genDiff('./tests/fixtures/file3.json', './tests/fixtures/file4.json', 'json');
-        $this->assertEquals($expected3, $actual5);
-
-        $actual6 = genDiff('./tests/fixtures/file3.yml', './tests/fixtures/file4.yml', 'json');
-        $this->assertEquals($expected3, $actual6);
+        $this->assertStringEqualsFile($expectedDiff, genDiff($fixture1, $fixture2, $format));
     }
 }
