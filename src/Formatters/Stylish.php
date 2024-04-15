@@ -43,7 +43,7 @@ function stringifyTree(mixed $value, string $replacer = ' ', int $spaceCount = 4
                     return "{$indentForMutableType}- {$item['key']}: {$iter($item['value1'], $depth + 1)}";
                 }
 
-                if ($item['type'] === 'updated') {
+                if ($item['type'] === 'changed') {
                     $added = "{$indentForMutableType}+ {$item['key']}: {$iter($item['value2'], $depth + 1)}";
                     $deleted = "{$indentForMutableType}- {$item['key']}: {$iter($item['value1'], $depth + 1)}";
                     return "{$deleted}\n{$added}";

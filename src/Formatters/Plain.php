@@ -38,11 +38,11 @@ function stringifyTreeToPlain(array $diffArray, string $parentKey = ''): string
                 return "Property '{$newKey}' was added with value: {$normalizeValue}";
             case 'deleted':
                 return "Property '{$newKey}' was removed";
-            case 'updated':
+            case 'changed':
                 $normalizeValue1 = normalizeValue($value1);
                 $normalizeValue2 = normalizeValue($value2);
                 return "Property '{$newKey}' was updated. From {$normalizeValue1} to {$normalizeValue2}";
-            case 'immutable':
+            case 'unchanged':
                 break;
             default:
                 throw new \Exception("Unknown node type: {$type}");
