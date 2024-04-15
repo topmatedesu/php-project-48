@@ -45,6 +45,10 @@ function getData(string $filePath): array
     $data = file_get_contents($fullPath);
     $extension = getExtension($filePath);
 
+    if ($data === false) {
+        throw new \Exception("Can't read file");
+    }
+
     return normalizeDataValue(parseData($data, $extension));
 }
 
