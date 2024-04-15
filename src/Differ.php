@@ -61,11 +61,11 @@ function getAstTree(array $data1, array $data2): array
 
     return array_map(
         function ($key) use ($data1, $data2) {
-            if (
-                array_key_exists($key, $data1) && array_key_exists($key, $data2)
-                && is_array($data1[$key]) && is_array($data2[$key])
-            ) {
-                $nestedComparison = getAstTree($data1[$key], $data2[$key]);
+            $nestedValue1 = $data1[$key] ?? null;
+            $nestedValue2 = $data2[$key] ?? null;
+
+            if (is_array($nestedValue1) && is_array($nestedValue2)) {
+                $nestedComparison = getAstTree($nestedValue1, $nestedValue2);
 
                 return [
                     'key' => $key,
@@ -73,35 +73,41 @@ function getAstTree(array $data1, array $data2): array
                     'value1' => $nestedComparison,
                     'value2' => $nestedComparison
                 ];
-            } elseif (!array_key_exists($key, $data2)) {
+            }
+
+            if (!array_key_exists($key, $data2)) {
                 return [
                     'key' => $key,
                     'type' => 'deleted',
-                    'value1' => $data1[$key],
+                    'value1' => $nestedValue1,
                     'value2' => null
                 ];
-            } elseif (!array_key_exists($key, $data1)) {
-                return  [
+            }
+
+            if (!array_key_exists($key, $data1)) {
+                return [
                     'key' => $key,
                     'type' => 'added',
                     'value1' => null,
-                    'value2' => $data2[$key]
-                ];
-            } elseif ($data1[$key] !== $data2[$key]) {
-                return  [
-                    'key' => $key,
-                    'type' => 'changed',
-                    'value1' => $data1[$key],
-                    'value2' => $data2[$key],
-                ];
-            } else {
-                return [
-                    'key' => $key,
-                    'type' => 'unchanged',
-                    'value1' => $data1[$key],
-                    'value2' => $data2[$key]
+                    'value2' => $nestedValue2
                 ];
             }
+
+            if ($nestedValue1 !== $nestedValue2) {
+                return [
+                    'key' => $key,
+                    'type' => 'changed',
+                    'value1' => $nestedValue1,
+                    'value2' => $nestedValue2,
+                ];
+            }
+
+            return [
+                'key' => $key,
+                'type' => 'unchanged',
+                'value1' => $nestedValue1,
+                'value2' => $nestedValue2
+            ];
         },
         $sortedKeys
     );
