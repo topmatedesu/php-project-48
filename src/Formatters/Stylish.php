@@ -2,21 +2,18 @@
 
 namespace Differ\Formatters\Stylish;
 
-function toString(string $value): string
-{
-    return trim(var_export($value, true), "'");
-}
+use function Differ\Differ\stringifyValue;
 
 function stringifyTree(mixed $value, string $replacer = ' ', int $spaceCount = 4): string
 {
     if (!is_array($value)) {
-        return toString($value);
+        return stringifyValue($value);
     }
 
     $iter = function ($currentValue, $depth) use (&$iter, $replacer, $spaceCount) {
 
         if (!is_array($currentValue)) {
-            return toString($currentValue);
+            return stringifyValue($currentValue);
         }
 
         $indentLength = $spaceCount * $depth;
@@ -27,11 +24,7 @@ function stringifyTree(mixed $value, string $replacer = ' ', int $spaceCount = 4
 
         $strings = array_map(
             function ($item, $key) use ($indentForImmutableType, $indentForMutableType, $iter, $depth) {
-                if (!is_array($item)) {
-                    return "{$indentForImmutableType}{$key}: {$iter($item, $depth + 1)}";
-                }
-
-                if (!array_key_exists('type', $item)) {
+                if (!is_array($item) || !array_key_exists('type', $item)) {
                     return "{$indentForImmutableType}{$key}: {$iter($item, $depth + 1)}";
                 }
 

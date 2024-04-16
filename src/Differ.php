@@ -2,9 +2,20 @@
 
 namespace Differ\Differ;
 
-use function Differ\Parsers\parseData;
+use function Differ\Parsers\parse;
 use function Differ\Formatters\getFormatter;
 use function Functional\sort;
+
+function genDiff(string $filePath1, string $filePath2, string $format = 'stylish'): string
+{
+    $data1 = getData($filePath1);
+    $data2 = getData($filePath2);
+
+    $diff = buildDiffTree($data1, $data2);
+    $formattedDiff = getFormatter($diff, $format);
+
+    return $formattedDiff;
+}
 
 function getRealPath(string $filePath): string
 {
@@ -22,21 +33,21 @@ function getExtension(string $filePath): string
     return pathinfo($fullPath, PATHINFO_EXTENSION);
 }
 
-function normalizeDataValue(array $data): array
+function stringifyValue(mixed $value): string
 {
-    return array_map(function ($value) {
-        if ($value === true) {
-            return 'true';
-        } elseif ($value === false) {
-            return 'false';
-        } elseif (is_null($value)) {
-            return 'null';
-        } elseif (is_array($value)) {
-            return normalizeDataValue($value);
-        }
+    if ($value === true) {
+        return 'true';
+    }
 
-        return $value;
-    }, $data);
+    if ($value === false) {
+        return 'false';
+    }
+
+    if (is_null($value)) {
+        return 'null';
+    }
+
+    return strval($value);
 }
 
 function getData(string $filePath): array
@@ -49,31 +60,20 @@ function getData(string $filePath): array
         throw new \Exception("Can't read file");
     }
 
-    return normalizeDataValue(parseData($data, $extension));
+    return parse($data, $extension);
 }
 
-function getAstTree(array $data1, array $data2): array
+function buildDiffTree(array $data1, array $data2): array
 {
-    $firstDataKeys = array_keys($data1);
-    $secondDataKeys = array_keys($data2);
-    $keys = array_unique(array_merge($firstDataKeys, $secondDataKeys));
+    $dataKeys1 = array_keys($data1);
+    $dataKeys2 = array_keys($data2);
+    $keys = array_unique(array_merge($dataKeys1, $dataKeys2));
     $sortedKeys = sort($keys, fn ($left, $right) => strcmp($left, $right));
 
     return array_map(
         function ($key) use ($data1, $data2) {
             $nestedValue1 = $data1[$key] ?? null;
             $nestedValue2 = $data2[$key] ?? null;
-
-            if (is_array($nestedValue1) && is_array($nestedValue2)) {
-                $nestedComparison = getAstTree($nestedValue1, $nestedValue2);
-
-                return [
-                    'key' => $key,
-                    'type' => 'nested',
-                    'value1' => $nestedComparison,
-                    'value2' => $nestedComparison
-                ];
-            }
 
             if (!array_key_exists($key, $data2)) {
                 return [
@@ -90,6 +90,17 @@ function getAstTree(array $data1, array $data2): array
                     'type' => 'added',
                     'value1' => null,
                     'value2' => $nestedValue2
+                ];
+            }
+
+            if (is_array($nestedValue1) && is_array($nestedValue2)) {
+                $nestedComparison = buildDiffTree($nestedValue1, $nestedValue2);
+
+                return [
+                    'key' => $key,
+                    'type' => 'nested',
+                    'value1' => $nestedComparison,
+                    'value2' => $nestedComparison
                 ];
             }
 
@@ -111,15 +122,4 @@ function getAstTree(array $data1, array $data2): array
         },
         $sortedKeys
     );
-}
-
-function genDiff(string $filePath1, string $filePath2, string $format = 'stylish'): string
-{
-    $data1 = getData($filePath1);
-    $data2 = getData($filePath2);
-
-    $diff = getAstTree($data1, $data2);
-    $formattedDiff = getFormatter($diff, $format);
-
-    return "{$formattedDiff}\n";
 }

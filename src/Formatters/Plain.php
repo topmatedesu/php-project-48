@@ -2,18 +2,12 @@
 
 namespace Differ\Formatters\Plain;
 
-function normalizeValue(mixed $value): mixed
+use function Differ\Differ\stringifyValue;
+
+function toString(mixed $value): string
 {
     if (!is_array($value)) {
-        if ($value === 'true' || $value === 'false' || $value === 'null') {
-            return $value;
-        }
-
-        if (is_numeric($value)) {
-            return $value;
-        }
-
-        return "'{$value}'";
+        return is_string($value) ? "'$value'" : stringifyValue($value);
     }
 
     return "[complex value]";
@@ -24,29 +18,26 @@ function stringifyTreeToPlain(array $diffArray, string $parentKey = ''): string
     $plain = array_map(function ($node) use ($parentKey) {
 
         $key =  $node['key'];
-        $type = $node['type'];
-        $value1 = $node['value1'];
-        $value2 = $node['value2'];
-
         $newKey = $parentKey === '' ? $key : "{$parentKey}.{$key}";
+        $type = $node['type'];
 
-        switch ($type) {
-            case 'nested':
-                return stringifyTreeToPlain($value1, $newKey);
-            case 'added':
-                $normalizeValue = normalizeValue($value2);
-                return "Property '{$newKey}' was added with value: {$normalizeValue}";
-            case 'deleted':
-                return "Property '{$newKey}' was removed";
-            case 'changed':
-                $normalizeValue1 = normalizeValue($value1);
-                $normalizeValue2 = normalizeValue($value2);
-                return "Property '{$newKey}' was updated. From {$normalizeValue1} to {$normalizeValue2}";
-            case 'unchanged':
-                break;
-            default:
-                throw new \Exception("Unknown node type: {$type}");
+        if ($type === 'nested') {
+            $value1 = $node['value1'];
+
+            return stringifyTreeToPlain($value1, $newKey);
         }
+
+        $value1 = toString($node['value1']);
+        $value2 = toString($node['value2']);
+
+        $types = [
+            'added' => "Property '{$newKey}' was added with value: {$value2}",
+            'deleted' => "Property '{$newKey}' was removed",
+            'changed' => "Property '{$newKey}' was updated. From {$value1} to {$value2}",
+            'unchanged' => ''
+        ];
+
+        return $types[$type] ?? throw new \Exception("Unknown node type: {$type}");
     }, $diffArray);
 
     $removeEmptyValues = array_filter($plain);
