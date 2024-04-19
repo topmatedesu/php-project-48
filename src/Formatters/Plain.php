@@ -4,23 +4,23 @@ namespace Differ\Formatters\Plain;
 
 function stringify(mixed $value): string
 {
-    if ($value === true) {
-        return 'true';
-    }
-
-    if ($value === false) {
-        return 'false';
+    if (is_bool($value)) {
+        return $value ? 'true' : 'false';
     }
 
     if (is_null($value)) {
         return 'null';
     }
 
-    if (!is_array($value)) {
+    if (is_array($value) || is_object($value)) {
+        return '[complex value]';
+    }
+
+    if (is_string($value)) {
         return "'$value'";
     }
 
-    return "[complex value]";
+    return (string) $value;
 }
 
 function stringifyTreeToPlain(array $diffArray, string $parentKey = ''): string

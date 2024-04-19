@@ -4,19 +4,15 @@ namespace Differ\Formatters\Stylish;
 
 function stringify(mixed $value): string
 {
-    if ($value === true) {
-        return 'true';
-    }
-
-    if ($value === false) {
-        return 'false';
+    if (is_bool($value)) {
+        return $value ? 'true' : 'false';
     }
 
     if (is_null($value)) {
         return 'null';
     }
 
-    return strval($value);
+    return (string) $value;
 }
 
 function stringifyTree(mixed $value, string $replacer = ' ', int $spaceCount = 4): string
