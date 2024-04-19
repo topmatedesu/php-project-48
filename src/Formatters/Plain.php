@@ -2,12 +2,22 @@
 
 namespace Differ\Formatters\Plain;
 
-use function Differ\Differ\stringifyValue;
-
-function toString(mixed $value): string
+function stringify(mixed $value): string
 {
+    if ($value === true) {
+        return 'true';
+    }
+
+    if ($value === false) {
+        return 'false';
+    }
+
+    if (is_null($value)) {
+        return 'null';
+    }
+
     if (!is_array($value)) {
-        return is_string($value) ? "'$value'" : stringifyValue($value);
+        return "'$value'";
     }
 
     return "[complex value]";
@@ -27,8 +37,8 @@ function stringifyTreeToPlain(array $diffArray, string $parentKey = ''): string
             return stringifyTreeToPlain($value1, $newKey);
         }
 
-        $value1 = toString($node['value1']);
-        $value2 = toString($node['value2']);
+        $value1 = stringify($node['value1']);
+        $value2 = stringify($node['value2']);
 
         $types = [
             'added' => "Property '{$newKey}' was added with value: {$value2}",

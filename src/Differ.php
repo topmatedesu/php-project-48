@@ -33,23 +33,6 @@ function getExtension(string $filePath): string
     return pathinfo($fullPath, PATHINFO_EXTENSION);
 }
 
-function stringifyValue(mixed $value): string
-{
-    if ($value === true) {
-        return 'true';
-    }
-
-    if ($value === false) {
-        return 'false';
-    }
-
-    if (is_null($value)) {
-        return 'null';
-    }
-
-    return strval($value);
-}
-
 function getData(string $filePath): array
 {
     $fullPath = getRealPath($filePath);

@@ -2,18 +2,33 @@
 
 namespace Differ\Formatters\Stylish;
 
-use function Differ\Differ\stringifyValue;
+function stringify(mixed $value): string
+{
+    if ($value === true) {
+        return 'true';
+    }
+
+    if ($value === false) {
+        return 'false';
+    }
+
+    if (is_null($value)) {
+        return 'null';
+    }
+
+    return strval($value);
+}
 
 function stringifyTree(mixed $value, string $replacer = ' ', int $spaceCount = 4): string
 {
     if (!is_array($value)) {
-        return stringifyValue($value);
+        return stringify($value);
     }
 
     $iter = function ($currentValue, $depth) use (&$iter, $replacer, $spaceCount) {
 
         if (!is_array($currentValue)) {
-            return stringifyValue($currentValue);
+            return stringify($currentValue);
         }
 
         $indentLength = $spaceCount * $depth;
