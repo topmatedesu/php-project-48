@@ -23,12 +23,12 @@ function stringify(mixed $value): string
     return (string) $value;
 }
 
-function stringifyTreeToPlain(array $diffArray, string $parentKey = ''): string
+function stringifyTreeToPlain(array $diffArray, string $ancestry = ''): string
 {
-    $plain = array_map(function ($node) use ($parentKey) {
+    $plain = array_map(function ($node) use ($ancestry) {
 
         $key =  $node['key'];
-        $newKey = $parentKey === '' ? $key : "{$parentKey}.{$key}";
+        $newKey = $ancestry === '' ? $key : "{$ancestry}.{$key}";
         $type = $node['type'];
 
         if ($type === 'nested') {

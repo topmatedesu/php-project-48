@@ -29,31 +29,27 @@ function stringifyTree(mixed $value, string $replacer = ' ', int $spaceCount = 4
 
         $indentLength = $spaceCount * $depth;
         $shiftToLeft = 2;
-        $indentForImmutableType = str_repeat($replacer, $indentLength);
-        $indentForMutableType = str_repeat($replacer, $indentLength - $shiftToLeft);
+        $indent = str_repeat($replacer, $indentLength - $shiftToLeft);
         $bracketIndent = str_repeat($replacer, $indentLength - $spaceCount);
 
         $strings = array_map(
-            function ($item, $key) use ($indentForImmutableType, $indentForMutableType, $iter, $depth) {
+            function ($item, $key) use ($indent, $iter, $depth) {
                 if (!is_array($item) || !array_key_exists('type', $item)) {
-                    return "{$indentForImmutableType}{$key}: {$iter($item, $depth + 1)}";
+                    return "  {$indent}{$key}: {$iter($item, $depth + 1)}";
                 }
 
-                if ($item['type'] === 'added') {
-                    return "{$indentForMutableType}+ {$item['key']}: {$iter($item['value2'], $depth + 1)}";
+                switch ($item['type']) {
+                    case 'added':
+                        return "{$indent}+ {$item['key']}: {$iter($item['value2'], $depth + 1)}";
+                    case 'deleted':
+                        return "{$indent}- {$item['key']}: {$iter($item['value1'], $depth + 1)}";
+                    case 'changed':
+                        $changed = ["{$indent}- {$item['key']}: {$iter($item['value1'], $depth + 1)}",
+                        "{$indent}+ {$item['key']}: {$iter($item['value2'], $depth + 1)}"];
+                        return implode("\n", $changed);
+                    default:
+                        return "  {$indent}{$item['key']}: {$iter($item['value1'], $depth + 1)}";
                 }
-
-                if ($item['type'] === 'deleted') {
-                    return "{$indentForMutableType}- {$item['key']}: {$iter($item['value1'], $depth + 1)}";
-                }
-
-                if ($item['type'] === 'changed') {
-                    $added = "{$indentForMutableType}+ {$item['key']}: {$iter($item['value2'], $depth + 1)}";
-                    $deleted = "{$indentForMutableType}- {$item['key']}: {$iter($item['value1'], $depth + 1)}";
-                    return "{$deleted}\n{$added}";
-                }
-
-                return "{$indentForImmutableType}{$item['key']}: {$iter($item['value1'], $depth + 1)}";
             },
             $currentValue,
             array_keys($currentValue)
