@@ -23,7 +23,7 @@ function stringify(mixed $value): string
     return (string) $value;
 }
 
-function stringifyTreeToPlain(array $diffArray, string $ancestry = ''): string
+function makePlain(array $diff, string $ancestry = ''): string
 {
     $plain = array_map(function ($node) use ($ancestry) {
 
@@ -31,26 +31,29 @@ function stringifyTreeToPlain(array $diffArray, string $ancestry = ''): string
         $newKey = $ancestry === '' ? $key : "{$ancestry}.{$key}";
         $type = $node['type'];
 
-        if ($type === 'nested') {
-            $value1 = $node['value1'];
-
-            return stringifyTreeToPlain($value1, $newKey);
+        switch ($type) {
+            case 'nested':
+                return makePlain($node['children'], $newKey);
+            case 'added':
+                $value = stringify($node['value']);
+                return "Property '{$newKey}' was added with value: {$value}";
+            case 'deleted':
+                return "Property '{$newKey}' was removed";
+            case 'changed':
+                $value1 = stringify($node['value1']);
+                $value2 = stringify($node['value2']);
+                return "Property '{$newKey}' was updated. From {$value1} to {$value2}";
+            case 'unchanged':
+                return '';
+            default:
+                throw new \Exception("Unknown node type: {$type}");
         }
+    }, $diff);
 
-        $value1 = stringify($node['value1']);
-        $value2 = stringify($node['value2']);
+    return implode("\n", array_filter($plain));
+}
 
-        $types = [
-            'added' => "Property '{$newKey}' was added with value: {$value2}",
-            'deleted' => "Property '{$newKey}' was removed",
-            'changed' => "Property '{$newKey}' was updated. From {$value1} to {$value2}",
-            'unchanged' => ''
-        ];
-
-        return $types[$type] ?? throw new \Exception("Unknown node type: {$type}");
-    }, $diffArray);
-
-    $removeEmptyValues = array_filter($plain);
-
-    return implode("\n", $removeEmptyValues);
+function renderPlain(array $diff): string
+{
+    return makePlain($diff);
 }

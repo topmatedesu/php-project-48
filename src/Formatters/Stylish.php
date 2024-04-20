@@ -15,12 +15,8 @@ function stringify(mixed $value): string
     return (string) $value;
 }
 
-function stringifyTree(mixed $value, string $replacer = ' ', int $spaceCount = 4): string
+function makeStylish(array $diff, string $replacer = ' ', int $spaceCount = 4): string
 {
-    if (!is_array($value)) {
-        return stringify($value);
-    }
-
     $iter = function ($currentValue, $depth) use (&$iter, $replacer, $spaceCount) {
 
         if (!is_array($currentValue)) {
@@ -40,15 +36,19 @@ function stringifyTree(mixed $value, string $replacer = ' ', int $spaceCount = 4
 
                 switch ($item['type']) {
                     case 'added':
-                        return "{$indent}+ {$item['key']}: {$iter($item['value2'], $depth + 1)}";
+                        return "{$indent}+ {$item['key']}: {$iter($item['value'], $depth + 1)}";
                     case 'deleted':
-                        return "{$indent}- {$item['key']}: {$iter($item['value1'], $depth + 1)}";
+                        return "{$indent}- {$item['key']}: {$iter($item['value'], $depth + 1)}";
                     case 'changed':
                         $changed = ["{$indent}- {$item['key']}: {$iter($item['value1'], $depth + 1)}",
                         "{$indent}+ {$item['key']}: {$iter($item['value2'], $depth + 1)}"];
                         return implode("\n", $changed);
+                    case 'unchanged':
+                        return "  {$indent}{$item['key']}: {$item['value']}";
+                    case 'nested':
+                        return "  {$indent}{$item['key']}: {$iter($item['children'], $depth + 1)}";
                     default:
-                        return "  {$indent}{$item['key']}: {$iter($item['value1'], $depth + 1)}";
+                        throw new \Exception('Unknown node type');
                 }
             },
             $currentValue,
@@ -58,5 +58,10 @@ function stringifyTree(mixed $value, string $replacer = ' ', int $spaceCount = 4
         return implode("\n", ["{", ...$strings, "{$bracketIndent}}"]);
     };
 
-    return $iter($value, 1);
+    return $iter($diff, 1);
+}
+
+function renderStylish(array $diff): string
+{
+    return makeStylish($diff);
 }

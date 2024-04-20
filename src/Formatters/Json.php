@@ -2,7 +2,7 @@
 
 namespace Differ\Formatters\Json;
 
-function getJsonFormat(array $diffArray): string
+function renderJson(array $diff): string
 {
-    return json_encode($diffArray);
+    return json_encode($diff);
 }

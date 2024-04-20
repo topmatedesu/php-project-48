@@ -62,8 +62,7 @@ function buildDiffTree(array $data1, array $data2): array
                 return [
                     'key' => $key,
                     'type' => 'deleted',
-                    'value1' => $value1,
-                    'value2' => null
+                    'value' => $value1
                 ];
             }
 
@@ -71,8 +70,7 @@ function buildDiffTree(array $data1, array $data2): array
                 return [
                     'key' => $key,
                     'type' => 'added',
-                    'value1' => null,
-                    'value2' => $value2
+                    'value' => $value2
                 ];
             }
 
@@ -80,8 +78,7 @@ function buildDiffTree(array $data1, array $data2): array
                 return [
                     'key' => $key,
                     'type' => 'nested',
-                    'value1' => buildDiffTree($value1, $value2),
-                    'value2' => buildDiffTree($value1, $value2)
+                    'children' => buildDiffTree($value1, $value2)
                 ];
             }
 
@@ -97,8 +94,7 @@ function buildDiffTree(array $data1, array $data2): array
             return [
                 'key' => $key,
                 'type' => 'unchanged',
-                'value1' => $value1,
-                'value2' => $value2
+                'value' => $value1
             ];
         },
         $sortedKeys
