@@ -12,14 +12,14 @@ function stringify(mixed $value, int $depth): string
         return 'null';
     }
 
-    if (!is_array($value) && !is_object($value)) {
+    if (!is_array($value)) {
         return (string) $value;
     }
 
     $arrayOfStrings = array_map(
-        function ($value, $key) use ($depth) {
+        function ($item, $key) use ($depth) {
             $indent = buildIndent($depth + 1);
-            $value = stringify($value, $depth + 1);
+            $value = stringify($item, $depth + 1);
             return "{$indent}{$key}: {$value}";
         },
         $value,
