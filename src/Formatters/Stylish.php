@@ -2,7 +2,7 @@
 
 namespace Differ\Formatters\Stylish;
 
-function stringify(mixed $value): string
+function stringify(mixed $value, int $depth): string
 {
     if (is_bool($value)) {
         return $value ? 'true' : 'false';
@@ -12,56 +12,71 @@ function stringify(mixed $value): string
         return 'null';
     }
 
-    return (string) $value;
+    if (!is_array($value) && !is_object($value)) {
+        return (string) $value;
+    }
+
+    $arrayOfStrings = array_map(
+        function ($value, $key) use ($depth) {
+            $indent = buildIndent($depth + 1);
+            $value = stringify($value, $depth + 1);
+            return "{$indent}{$key}: {$value}";
+        },
+        $value,
+        array_keys($value)
+    );
+    $indentEnd = buildIndent($depth);
+    $string = implode("\n", $arrayOfStrings);
+
+    return "{\n{$string}\n{$indentEnd}}";
 }
 
-function makeStylish(array $diff, string $replacer = ' ', int $spaceCount = 4): string
+function buildIndent(int $depth = 1, int $shift = 0, int $spaceCount = 4): string
 {
-    $iter = function ($currentValue, $depth) use (&$iter, $replacer, $spaceCount) {
-
-        if (!is_array($currentValue)) {
-            return stringify($currentValue);
-        }
-
-        $indentLength = $spaceCount * $depth;
-        $shiftToLeft = 2;
-        $indent = str_repeat($replacer, $indentLength - $shiftToLeft);
-        $bracketIndent = str_repeat($replacer, $indentLength - $spaceCount);
-
-        $strings = array_map(
-            function ($item, $key) use ($indent, $iter, $depth) {
-                if (!is_array($item) || !array_key_exists('type', $item)) {
-                    return "  {$indent}{$key}: {$iter($item, $depth + 1)}";
-                }
-
-                switch ($item['type']) {
-                    case 'added':
-                        return "{$indent}+ {$item['key']}: {$iter($item['value'], $depth + 1)}";
-                    case 'deleted':
-                        return "{$indent}- {$item['key']}: {$iter($item['value'], $depth + 1)}";
-                    case 'changed':
-                        $changed = ["{$indent}- {$item['key']}: {$iter($item['value1'], $depth + 1)}",
-                        "{$indent}+ {$item['key']}: {$iter($item['value2'], $depth + 1)}"];
-                        return implode("\n", $changed);
-                    case 'unchanged':
-                        return "  {$indent}{$item['key']}: {$item['value']}";
-                    case 'nested':
-                        return "  {$indent}{$item['key']}: {$iter($item['children'], $depth + 1)}";
-                    default:
-                        throw new \Exception('Unknown node type');
-                }
-            },
-            $currentValue,
-            array_keys($currentValue)
-        );
-
-        return implode("\n", ["{", ...$strings, "{$bracketIndent}}"]);
-    };
-
-    return $iter($diff, 1);
+    return str_repeat(' ', $spaceCount * $depth - $shift);
 }
 
-function renderStylish(array $diff): string
+function makeStylish(array $diff, int $depth = 1): string
 {
-    return makeStylish($diff);
+    $stylish = array_map(
+        function ($node) use ($depth) {
+            $key = $node['key'];
+            $type = $node['type'];
+            $indent = buildIndent($depth);
+            $smallIndent = buildIndent($depth, 2);
+
+            switch ($type) {
+                case 'added':
+                    $value = stringify($node['value'], $depth);
+                    return "{$smallIndent}+ {$key}: {$value}";
+                case 'deleted':
+                    $value = stringify($node['value'], $depth);
+                    return "{$smallIndent}- {$key}: {$value}";
+                case 'changed':
+                    $value1 = stringify($node['value1'], $depth);
+                    $value2 = stringify($node['value2'], $depth);
+                    $changed = ["{$smallIndent}- {$key}: {$value1}",
+                    "{$smallIndent}+ {$key}: {$value2}"];
+                    return implode("\n", $changed);
+                case 'unchanged':
+                    $value = stringify($node['value'], $depth);
+                    return "{$indent}{$key}: {$value}";
+                case 'nested':
+                    $children = makeStylish($node['children'], $depth + 1);
+                    return "{$indent}{$key}: {\n{$children}\n{$indent}}";
+                default:
+                    throw new \Exception('Unknown node type');
+            }
+        },
+        $diff
+    );
+
+    return implode("\n", $stylish);
+}
+
+function render(array $diff): string
+{
+    $stylish = makeStylish($diff);
+
+    return "{\n{$stylish}\n}";
 }

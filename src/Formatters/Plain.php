@@ -28,21 +28,21 @@ function makePlain(array $diff, string $ancestry = ''): string
     $plain = array_map(function ($node) use ($ancestry) {
 
         $key =  $node['key'];
-        $newKey = $ancestry === '' ? $key : "{$ancestry}.{$key}";
+        $propertyName = $ancestry === '' ? $key : "{$ancestry}.{$key}";
         $type = $node['type'];
 
         switch ($type) {
             case 'nested':
-                return makePlain($node['children'], $newKey);
+                return makePlain($node['children'], $propertyName);
             case 'added':
                 $value = stringify($node['value']);
-                return "Property '{$newKey}' was added with value: {$value}";
+                return "Property '{$propertyName}' was added with value: {$value}";
             case 'deleted':
-                return "Property '{$newKey}' was removed";
+                return "Property '{$propertyName}' was removed";
             case 'changed':
                 $value1 = stringify($node['value1']);
                 $value2 = stringify($node['value2']);
-                return "Property '{$newKey}' was updated. From {$value1} to {$value2}";
+                return "Property '{$propertyName}' was updated. From {$value1} to {$value2}";
             case 'unchanged':
                 return '';
             default:
@@ -53,7 +53,7 @@ function makePlain(array $diff, string $ancestry = ''): string
     return implode("\n", array_filter($plain));
 }
 
-function renderPlain(array $diff): string
+function render(array $diff): string
 {
     return makePlain($diff);
 }
